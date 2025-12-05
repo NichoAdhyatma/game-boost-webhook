@@ -3,6 +3,7 @@ import { AccountOrderWebhook } from "../types/event-payload/account-order-webhoo
 import { CurrencyOrderWebhook } from "../types/event-payload/currency-order-webhook";
 import { ItemOrderWebhook } from "../types/event-payload/item-order-webhook";
 import { OrderReportWebhook } from "../types/event-payload/order-report-webhooks";
+import { fetchWithAgent } from "./fetch-with-agent";
 
 interface FonteConfig {
   apiUrl: string;
@@ -57,7 +58,7 @@ class WhatsAppService {
       formData.append("typing", "true");
       formData.append("delay", "0");
 
-      const response = await fetch(this.config.apiUrl, {
+      const response = await fetchWithAgent(this.config.apiUrl, {
         method: "POST",
         headers: {
           Authorization: this.config.token,

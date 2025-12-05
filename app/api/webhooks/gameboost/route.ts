@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { isWebhookProcessed, logWebhook, markWebhookProcessed, storeFailedWebhook, verifyWebhookSignature } from "@/app/helper/verify-webhook-signature";
 import { WEBHOOK_SECRET } from "@/app/lib/config";
 import { GameBoostWebhook } from "@/app/types/event-payload";
