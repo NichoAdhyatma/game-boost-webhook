@@ -4,8 +4,6 @@ require("dotenv").config();
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const crypto = require("crypto");
 
-console.log("Loaded secret:", process.env.GAMEBOOST_WEBHOOK_SECRET);
-
 
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const WEBHOOK_SECRET = process.env.GAMEBOOST_WEBHOOK_SECRET;
