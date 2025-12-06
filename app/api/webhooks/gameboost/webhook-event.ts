@@ -66,21 +66,25 @@ export async function processOrderReport(webhook: OrderReportWebhook) {
 }
 
 export async function processWebhook(webhook: GameBoostWebhook) {
+  const notifications: Promise<void>[] = [];
+
   switch (webhook.event) {
     case "currency.order.purchased":
-      await processCurrencyOrder(webhook);
+      notifications.push(processCurrencyOrder(webhook));
       break;
     case "account.order.purchased":
-      await processAccountOrder(webhook);
+      notifications.push(processAccountOrder(webhook));
       break;
     case "item.order.purchased":
-      await processItemOrder(webhook);
+      notifications.push(processItemOrder(webhook));
       break;
     case "order.report.issued":
-      await processOrderReport(webhook);
+      notifications.push(processOrderReport(webhook));
       break;
     default:
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       console.warn("Unknown webhook event:", (webhook as any).event);
   }
+
+  await Promise.allSettled(notifications);
 }

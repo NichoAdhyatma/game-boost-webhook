@@ -4,7 +4,7 @@ const httpsAgent = new Agent({
   keepAliveTimeout: 10_000,
   keepAliveMaxTimeout: 15_000,
   connect: {
-    rejectUnauthorized: false, // sama dengan https.Agent
+    rejectUnauthorized: false, 
   },
 });
 
@@ -12,6 +12,6 @@ const httpsAgent = new Agent({
 export async function fetchWithAgent(url: string, options: any = {}) {
   return fetch(url, {
     ...options,
-    dispatcher: httpsAgent, // ini valid untuk Next.js
+    dispatcher: httpsAgent, 
   });
 }

@@ -45,43 +45,52 @@ class WhatsAppService {
       }
 
       const recipient = to || this.config.defaultRecipient;
-
       if (!recipient) {
         throw new Error("No recipient specified");
       }
-
 
       const formData = new URLSearchParams();
       formData.append("target", recipient);
       formData.append("message", message);
       formData.append("countryCode", this.config.countryCode);
-      formData.append("typing", "true");
+      formData.append("typing", "false");
       formData.append("delay", "0");
 
-      const response = await fetchWithAgent(this.config.apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: this.config.token,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      if (!response.ok) {
-        throw new Error(`Failed to send message: ${response.statusText}`);
+      try {
+        const response = await fetchWithAgent(this.config.apiUrl, {
+          method: "POST",
+          headers: {
+            Authorization: this.config.token,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: formData.toString(),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`Failed to send message: ${response.statusText}`);
+        }
+
+        const data: FonteResponse = await response.json();
+
+        if (data.status) {
+          console.log("✅ WhatsApp sent:", data.id || "success");
+          return true;
+        }
+
+        console.error("❌ Fonnte error:", data.detail || data.message);
+        return false;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
       }
-
-      const data: FonteResponse = await response.json();
-
-      if (data.status) {
-        console.log("✅ WhatsApp message sent via Fonnte:", data.id || "success");
-        return true;
-      }
-
-      console.error("❌ Fonnte API returned error:", data.detail || data.message);
-      return false;
     } catch (error) {
-      console.error("❌ Error sending WhatsApp message:", error);
+      console.error("❌ Error sending WhatsApp:", error);
       return false;
     }
   }
