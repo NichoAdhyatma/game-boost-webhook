@@ -1,17 +1,18 @@
-import { Agent } from "undici";
 
-const httpsAgent = new Agent({
-  keepAliveTimeout: 10_000,
-  keepAliveMaxTimeout: 15_000,
-  connect: {
-    rejectUnauthorized: false, 
-  },
-});
+export async function fetchWithTimeout(url: string, options: RequestInit = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10_000); 
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function fetchWithAgent(url: string, options: any = {}) {
-  return fetch(url, {
-    ...options,
-    dispatcher: httpsAgent, 
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
 }

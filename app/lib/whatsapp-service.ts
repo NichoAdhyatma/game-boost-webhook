@@ -3,7 +3,7 @@ import { AccountOrderWebhook } from "../types/event-payload/account-order-webhoo
 import { CurrencyOrderWebhook } from "../types/event-payload/currency-order-webhook";
 import { ItemOrderWebhook } from "../types/event-payload/item-order-webhook";
 import { OrderReportWebhook } from "../types/event-payload/order-report-webhooks";
-import { fetchWithAgent } from "./fetch-with-agent";
+import { fetchWithTimeout } from "./fetch-with-agent";
 
 interface FonteConfig {
   apiUrl: string;
@@ -56,21 +56,16 @@ class WhatsAppService {
       formData.append("typing", "false");
       formData.append("delay", "0");
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-
       try {
-        const response = await fetchWithAgent(this.config.apiUrl, {
+        const response = await fetchWithTimeout(this.config.apiUrl, {
           method: "POST",
           headers: {
             Authorization: this.config.token,
             "Content-Type": "application/x-www-form-urlencoded",
           },
           body: formData.toString(),
-          signal: controller.signal,
         });
 
-        clearTimeout(timeoutId);
 
         if (!response.ok) {
           throw new Error(`Failed to send message: ${response.statusText}`);
@@ -86,7 +81,6 @@ class WhatsAppService {
         console.error("❌ Fonnte error:", data.detail || data.message);
         return false;
       } catch (error) {
-        clearTimeout(timeoutId);
         throw error;
       }
     } catch (error) {
